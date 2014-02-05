@@ -18,6 +18,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
+import android.widget.Button;
+
+import android.content.*;
 
 public class MainActivity extends Activity {
 
@@ -31,7 +34,9 @@ public class MainActivity extends Activity {
 	private static UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final String TAG = "MainActivity";
 	private String connectedDeviceName = null;
-
+	private Button lockButton;
+	private Button unlockButton;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,6 +54,14 @@ public class MainActivity extends Activity {
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();
+		
+		//set lock unlock buttons to disbled
+		lockButton = (Button) findViewById(R.id.lock);
+		unlockButton = (Button) findViewById(R.id.unlock);
+		
+		lockButton.setEnabled(false);
+		unlockButton.setEnabled(false);
+		
 		if (bluetooth == null) 	{
 			bluetooth = BluetoothAdapter.getDefaultAdapter();
 			
@@ -58,6 +71,7 @@ public class MainActivity extends Activity {
 				return;
 			}
 		}
+		
 		
 		//BluetoothDevice device = bluetooth.getRemoteDevice("00:06:66:4E:48:B9");
 		BluetoothDevice device = bluetooth.getRemoteDevice("00:06:66:64:41:52");
@@ -101,6 +115,19 @@ public class MainActivity extends Activity {
 			messageHandler.sendMessage(msg);
 		}
 		
+	}
+	
+	public void reconnectAttempt(View v) {
+		Message msg = messageHandler.obtainMessage(MESSAGE_TOAST);
+		Bundle bundle = new Bundle();
+		bundle.putString(TOAST, "attempting reconnect");
+		msg.setData(bundle);
+		messageHandler.sendMessage(msg);
+		stop();
+		BluetoothDevice device = bluetooth.getRemoteDevice("00:06:66:64:41:52");
+
+		mConnectThread = new ConnectThread(device);
+		mConnectThread.start();
 	}
 	
 	private class ConnectThread extends Thread {
@@ -161,7 +188,10 @@ public class MainActivity extends Activity {
 	
 	public synchronized void connected(BluetoothSocket socket,
 			BluetoothDevice device) {
-
+		//reenable buttons
+		lockButton.setEnabled(true);
+		unlockButton.setEnabled(true);
+		
 		if (mConnectedThread != null) {
 			mConnectedThread.cancel();
 			mConnectedThread = null;
@@ -274,7 +304,8 @@ public class MainActivity extends Activity {
 	}
     
 	public synchronized void stop() {
-
+		lockButton.setEnabled(false);
+		unlockButton.setEnabled(false);
 		if (mConnectThread != null) {
 			mConnectThread.cancel();
 			mConnectThread = null;
