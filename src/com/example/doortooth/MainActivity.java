@@ -188,9 +188,7 @@ public class MainActivity extends Activity {
 	
 	public synchronized void connected(BluetoothSocket socket,
 			BluetoothDevice device) {
-		//reenable buttons
-		lockButton.setEnabled(true);
-		unlockButton.setEnabled(true);
+		
 		
 		if (mConnectedThread != null) {
 			mConnectedThread.cancel();
@@ -276,23 +274,27 @@ public class MainActivity extends Activity {
 	private final Handler messageHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-			switch (msg.what) {
-            case MESSAGE_READ:
-                byte[] readBuf = (byte[]) msg.obj;
-                // construct a string from the valid bytes in the buffer
-                String readMessage = new String(readBuf, 0, msg.arg1);
-                Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_LONG).show();
-                break;
-            case MESSAGE_DEVICE_NAME:
-                // save the connected device's name
-                connectedDeviceName = msg.getData().getString("device_name");
-                Toast.makeText(getApplicationContext(), "Connected to "
-                               + connectedDeviceName, Toast.LENGTH_LONG).show();
-                break;
-            case MESSAGE_TOAST:
-                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
-                               Toast.LENGTH_SHORT).show();
-                break;
+			switch (msg.what)
+			{
+				case MESSAGE_READ:
+					byte[] readBuf = (byte[]) msg.obj;
+					// construct a string from the valid bytes in the buffer
+					String readMessage = new String(readBuf, 0, msg.arg1);
+					Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_LONG).show();
+					break;
+				case MESSAGE_DEVICE_NAME:
+					// save the connected device's name
+					connectedDeviceName = msg.getData().getString("device_name");
+					Toast.makeText(getApplicationContext(), "Connected to "
+								   + connectedDeviceName, Toast.LENGTH_LONG).show();
+					//reenable buttons
+					lockButton.setEnabled(true);
+					unlockButton.setEnabled(true);
+					break;
+				case MESSAGE_TOAST:
+					Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+								   Toast.LENGTH_SHORT).show();
+					break;
             }
         }
     };	
